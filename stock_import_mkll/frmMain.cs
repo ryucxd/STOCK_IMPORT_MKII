@@ -139,25 +139,93 @@ namespace stock_import_mkll
         {
             //second csv and up
             MessageBox.Show("entered csv append ");
+            string textLine = string.Empty;
+            string[] splitLine;
+            DataTable dt = new DataTable();
+            //add current dgv to this
+            for (int i = 0; i < dataGridView1.Columns.Count; i++)
+                dt.Columns.Add("column" + i.ToString());
+            foreach (DataGridViewRow row in dataGridView1.Rows)
+            {
+                DataRow dr = dt.NewRow();
+                for (int z = 0; z < dataGridView1.Columns.Count; z++)
+                {
+                    dr["column" + z.ToString()] = row.Cells[z].Value;
+                }
+                dt.Rows.Add(dr);
+            }
+            dataGridView1.DataSource = null;
+            dataGridView1.Rows.Clear();
+            //should only add as there is no clear
+            if (System.IO.File.Exists(fileName))
+            {
+                System.IO.StreamReader reader = new System.IO.StreamReader(fileName);
+                var contents = reader.ReadToEnd();
+                var strReader = new System.IO.StringReader(contents);
+                strReader.ReadLine();
+
+                do
+                {
+                    textLine = strReader.ReadLine();
+                    if (textLine != string.Empty)
+                    {
+                        splitLine = textLine.Split(';');
+                        if (splitLine[0] != string.Empty || splitLine[1] != string.Empty)
+                        {
+                            dt.Rows.Add(splitLine);
+                        }
+                    }
+
+                } while (strReader.Peek() != -1);
+            }
+            dataGridView1.DataSource = dt;
+            extendedDataTable = dt;
+            missingDescription();
+            stockValidation();
         }
 
 
+        bool IsDigitsOnly(string str)
+        {
+            foreach (char c in str)
+            {
+                if (c < '0' || c > '9')
+                    return false;
+            }
+
+            return true;
+        }
+
         private void missingDescription()
         {
+            lbl_prog.Text = "Adding missing descriptions...";
             //this is a bit overkill but none the less
             string sql = "";
             using (SqlConnection conn = new SqlConnection(CONNECT.ConnectionString))
             {
                 foreach (DataGridViewRow row in dataGridView1.Rows)
                 {
-                    sql = "SELECT [description] FROM dbo.stock WHERE stock_code = " + dataGridView1.Rows[row.Index].Cells[0].Value.ToString();
-                    using (SqlCommand cmd = new SqlCommand(sql, conn))
+                    if (IsDigitsOnly(dataGridView1.Rows[row.Index].Cells[0].Value.ToString()) == true)
                     {
-                        string missingData = "";
-                        conn.Open();
-                        missingData = Convert.ToString(cmd.ExecuteScalar());
-                        conn.Close();
-                        dataGridView1.Rows[row.Index].Cells[1].Value = missingData;
+                        MessageBox.Show("its true" + dataGridView1.Rows[row.Index].Cells[0].Value.ToString());
+
+
+                        sql = "SELECT [description] FROM dbo.stock WHERE stock_code = " + dataGridView1.Rows[row.Index].Cells[0].Value.ToString();
+                        using (SqlCommand cmd = new SqlCommand(sql, conn))
+                        {
+                            string missingData = "";
+                            conn.Open();
+                            missingData = Convert.ToString(cmd.ExecuteScalar());
+                            conn.Close();
+                            dataGridView1.Rows[row.Index].Cells[1].Value = missingData;
+                        }
+                    }
+                    else
+                    {
+                        //open new form and have the user 
+
+                        //change the current datarow to the new version and carry on
+
                     }
                 }
             }
@@ -179,6 +247,7 @@ namespace stock_import_mkll
 
         private void stockValidation()
         {
+            lbl_prog.Text = "Checking for Errors...";
             //work out cost of each stock entered and if it is above X value then trigger a warning.
             using (SqlConnection conn = new SqlConnection(CONNECT.ConnectionString))
             {
@@ -188,6 +257,7 @@ namespace stock_import_mkll
                 progression.Maximum = progression_complete;
                 decimal price;
                 int isYellow = 0;
+                int isRed = 0;
                 string temp;
                 decimal total_price;
                 decimal quantity;
@@ -235,16 +305,30 @@ namespace stock_import_mkll
                             row.DefaultCellStyle.BackColor = Color.Yellow;
                             isYellow = isYellow + 1;
                         }
+
+                        if (dataGridView1.Rows[row.Index].Cells[0].Value.ToString().Length > 4)
+                        {
+                            isRed = isRed + 1;
+                            row.DefaultCellStyle.BackColor = Color.Red;
+                        }
                     }
                     progression.Value = progression.Value + 1;
                 }
                 btn_check_csv.Show();
                 if (isYellow > 0)
                     MessageBox.Show("There are " + isYellow.ToString() + " entries that have triggered warnings. Please click 'Check CSV' to amend these");
+                if (isRed > 0)
+                    MessageBox.Show("There are " + isRed.ToString() + "entries that have triggered ERRORS. Please click 'Check CSV' to remove these ", "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
 
                 progression.Hide();
                 progression.Value = 0;
+                lbl_prog.Text = "To fix any errors click 'Check CSV'!";
             }
+
+        }
+
+        private void Btn_check_csv_Click(object sender, EventArgs e)
+        {
 
         }
     }

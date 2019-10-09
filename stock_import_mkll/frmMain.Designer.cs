@@ -86,6 +86,7 @@
             // 
             // btn_add_csv
             // 
+            this.btn_add_csv.Font = new System.Drawing.Font("Calibri", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btn_add_csv.Location = new System.Drawing.Point(12, 87);
             this.btn_add_csv.Name = "btn_add_csv";
             this.btn_add_csv.Size = new System.Drawing.Size(75, 23);
@@ -147,12 +148,14 @@
             // btn_check_csv
             // 
             this.btn_check_csv.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btn_check_csv.Font = new System.Drawing.Font("Calibri", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btn_check_csv.Location = new System.Drawing.Point(354, 87);
             this.btn_check_csv.Name = "btn_check_csv";
             this.btn_check_csv.Size = new System.Drawing.Size(75, 23);
             this.btn_check_csv.TabIndex = 9;
             this.btn_check_csv.Text = "Check CSV";
             this.btn_check_csv.UseVisualStyleBackColor = true;
+            this.btn_check_csv.Click += new System.EventHandler(this.Btn_check_csv_Click);
             // 
             // txt_csv_location
             // 
