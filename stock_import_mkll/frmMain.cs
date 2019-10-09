@@ -14,9 +14,13 @@ namespace stock_import_mkll
     public partial class frmMain : Form
     {
         //props
+        public int[] rowIndex = new int[20];
+        public int arrayIndex { get; set; }
         public int multiple_csv_check { get; set; }
         public int progression_complete { get; set; }
         public DataTable extendedDataTable { get; set; }
+        public DataTable noStockCodeDT { get; set; }
+        public DataTable fixedStockCodeDT { get; set; }
         public frmMain()
         {
             InitializeComponent();
@@ -207,9 +211,6 @@ namespace stock_import_mkll
                 {
                     if (IsDigitsOnly(dataGridView1.Rows[row.Index].Cells[0].Value.ToString()) == true)
                     {
-                        MessageBox.Show("its true" + dataGridView1.Rows[row.Index].Cells[0].Value.ToString());
-
-
                         sql = "SELECT [description] FROM dbo.stock WHERE stock_code = " + dataGridView1.Rows[row.Index].Cells[0].Value.ToString();
                         using (SqlCommand cmd = new SqlCommand(sql, conn))
                         {
@@ -222,12 +223,27 @@ namespace stock_import_mkll
                     }
                     else
                     {
-                        //open new form and have the user 
-
-                        //change the current datarow to the new version and carry on
+                        //keep track of which rows need to be changed
+                        rowIndex[arrayIndex] = row.Index;
+                        arrayIndex++;
+                        //add to DT to pass over
+                        DataTable data = new DataTable();
+                        data.Rows.Add();
+                        for (int i = 0; i < dataGridView1.Columns.Count; i++)
+                            data.Columns.Add("column" + i.ToString());
+                        data.Rows[0][0] = dataGridView1.Rows[row.Index].Cells[0].Value;
+                        data.Rows[0][1] = dataGridView1.Rows[row.Index].Cells[1].Value;
+                        data.Rows[0][2] = dataGridView1.Rows[row.Index].Cells[2].Value;
+                        data.Rows[0][3] = dataGridView1.Rows[row.Index].Cells[3].Value;
+                        data.Rows[0][4] = dataGridView1.Rows[row.Index].Cells[4].Value;
+                        data.Rows[0][5] = dataGridView1.Rows[row.Index].Cells[5].Value;
+                        //openform
+                        frmFixStockCode frm = new frmFixStockCode(data);
+                        frm.ShowDialog();
 
                     }
                 }
+                MessageBox.Show(rowIndex[0].ToString());
             }
 
 

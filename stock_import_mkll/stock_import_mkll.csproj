@@ -50,6 +50,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CONNECT.cs" />
+    <Compile Include="frmFixStockCode.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmFixStockCode.Designer.cs">
+      <DependentUpon>frmFixStockCode.cs</DependentUpon>
+    </Compile>
     <Compile Include="frmMain.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -58,6 +64,9 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="frmFixStockCode.resx">
+      <DependentUpon>frmFixStockCode.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="frmMain.resx">
       <DependentUpon>frmMain.cs</DependentUpon>
     </EmbeddedResource>
