@@ -19,7 +19,7 @@ namespace stock_import_mkll
         public int multiple_csv_check { get; set; }
         public int progression_complete { get; set; }
         public DataTable extendedDataTable { get; set; }
-        public DataTable noStockCodeDT { get; set; }
+        public int datatableCount { get; set; }
         public DataTable fixedStockCodeDT { get; set; }
         public frmMain()
         {
@@ -31,6 +31,7 @@ namespace stock_import_mkll
             cmb_type.Items.Add("Full");
             cmb_type.Items.Add("Partial");
             cmb_type.Items.Add("Incremental");
+            datatableCount = 0;
         }
 
         private void FrmMain_Load(object sender, EventArgs e)
@@ -45,6 +46,7 @@ namespace stock_import_mkll
 
         private void Btn_add_csv_Click(object sender, EventArgs e)
         {
+            datatableCount = 0;
             //select DEPARTMENT and TYPE before adding csv
             if (string.IsNullOrEmpty(cmb_department.Text) || string.IsNullOrEmpty(cmb_type.Text))
             {
@@ -87,6 +89,16 @@ namespace stock_import_mkll
         //csv voids
         private void csv_import(string fileName)
         {
+            //initialise DT and add columns
+            fixedStockCodeDT = new DataTable();
+            fixedStockCodeDT.Columns.AddRange(new[] {
+                    new DataColumn ("item Code"),
+                    new DataColumn ("item name"),
+                    new DataColumn ("QTY"),
+                    new DataColumn ("UoM"),
+                    new DataColumn ("Location"),
+                    new DataColumn ("TimeStamp")
+                });
             //first csv
             string textLine = string.Empty;
             string[] splitline;
@@ -100,7 +112,7 @@ namespace stock_import_mkll
                 new DataColumn ("item name"),
                 new DataColumn ("QTY"),
                 new DataColumn ("UoM"),
-                new DataColumn ("Stock"),
+                new DataColumn ("Location"),
                 new DataColumn ("TimeStamp")
             });
 
@@ -129,6 +141,7 @@ namespace stock_import_mkll
 
             //add it to the DGV
             dataGridView1.DataSource = data;
+            extendedDataTable = data;
             //add missing descriptions
             missingDescription(); // it also adds it to the prop in this function 
 
@@ -141,6 +154,16 @@ namespace stock_import_mkll
 
         private void csv_append(string fileName)
         {
+            //initialise DT and add columns
+            fixedStockCodeDT = new DataTable();
+            fixedStockCodeDT.Columns.AddRange(new[] {
+                    new DataColumn ("item Code"),
+                    new DataColumn ("item name"),
+                    new DataColumn ("QTY"),
+                    new DataColumn ("UoM"),
+                    new DataColumn ("Location"),
+                    new DataColumn ("TimeStamp")
+                });
             //second csv and up
             MessageBox.Show("entered csv append ");
             string textLine = string.Empty;
@@ -183,6 +206,7 @@ namespace stock_import_mkll
                 } while (strReader.Peek() != -1);
             }
             dataGridView1.DataSource = dt;
+            extendedDataTable = null;
             extendedDataTable = dt;
             missingDescription();
             stockValidation();
@@ -202,6 +226,9 @@ namespace stock_import_mkll
 
         private void missingDescription()
         {
+            int elseLoop = 0;
+            
+
             lbl_prog.Text = "Adding missing descriptions...";
             //this is a bit overkill but none the less
             string sql = "";
@@ -209,7 +236,7 @@ namespace stock_import_mkll
             {
                 foreach (DataGridViewRow row in dataGridView1.Rows)
                 {
-                    if (IsDigitsOnly(dataGridView1.Rows[row.Index].Cells[0].Value.ToString()) == true)
+                    if (IsDigitsOnly(dataGridView1.Rows[row.Index].Cells[0].Value.ToString()) == true && (dataGridView1.Rows[row.Index].Cells[0].Value.ToString().Length) >0 )
                     {
                         sql = "SELECT [description] FROM dbo.stock WHERE stock_code = " + dataGridView1.Rows[row.Index].Cells[0].Value.ToString();
                         using (SqlCommand cmd = new SqlCommand(sql, conn))
@@ -223,6 +250,7 @@ namespace stock_import_mkll
                     }
                     else
                     {
+                        elseLoop = 1;
                         //keep track of which rows need to be changed
                         rowIndex[arrayIndex] = row.Index;
                         arrayIndex++;
@@ -240,10 +268,51 @@ namespace stock_import_mkll
                         //openform
                         frmFixStockCode frm = new frmFixStockCode(data);
                         frm.ShowDialog();
+                        //add new vaLUes to dt if its not null
+                        
+                        if ((GlobalVariables.col0.Length) > 0)
+                        {
+                            fixedStockCodeDT.Rows.Add();
+                            fixedStockCodeDT.Rows[datatableCount][0] = GlobalVariables.col0;
+                            fixedStockCodeDT.Rows[datatableCount][1] = GlobalVariables.col1;
+                            fixedStockCodeDT.Rows[datatableCount][2] = GlobalVariables.col2;
+                            fixedStockCodeDT.Rows[datatableCount][3] = GlobalVariables.col3;
+                            fixedStockCodeDT.Rows[datatableCount][4] = GlobalVariables.col4;
+                            fixedStockCodeDT.Rows[datatableCount][5] = GlobalVariables.col5;
+                            datatableCount++;
+                        }
+
 
                     }
                 }
-                MessageBox.Show(rowIndex[0].ToString());
+                //delete rowindex and add new table
+                if (elseLoop == 1)
+                {
+                    int adjust = 0;
+                    for (int i = 0; i < arrayIndex; i++)
+                    {
+                       // MessageBox.Show("dgv count -> " + dataGridView1.Rows.Count.ToString());
+                        //MessageBox.Show("array index -> " + rowIndex[i].ToString());
+                        dataGridView1.Rows.RemoveAt(rowIndex[i] - adjust);
+                        adjust++;
+                    }
+                    //if (fixedStockCodeDT.Rows.Count > 0)
+                    //{
+                    //    extendedDataTable.Rows.Clear();
+                    //    foreach (DataGridViewRow row in dataGridView1.Rows)
+                    //    {
+                    //        DataRow DR = extendedDataTable.NewRow();
+                    //        foreach (DataGridViewCell cell in row.Cells)
+                    //            DR[cell.ColumnIndex] = cell.Value;
+                    //        extendedDataTable.Rows.Add(DR);
+                    //    }
+                    //    //extendedDataTable.Merge(fixedStockCodeDT);
+                    //    dataGridView1.DataSource = extendedDataTable;
+                    //    fixedStockCodeDT = null;
+                    //  //  missingDescription();
+                    //}
+
+                }
             }
 
 
@@ -259,10 +328,39 @@ namespace stock_import_mkll
                 dt.Rows.Add(dRow);
             }
             extendedDataTable = dt;
+            extendedDataTable.Merge(fixedStockCodeDT);
+
+            fixedStockCodeDT = null;
+            fixedStockCodeDT = new DataTable();
+            fixedStockCodeDT.Columns.AddRange(new[] {
+                    new DataColumn ("item Code"),
+                    new DataColumn ("item name"),
+                    new DataColumn ("QTY"),
+                    new DataColumn ("UoM"),
+                    new DataColumn ("Location"),
+                    new DataColumn ("TimeStamp")
+                });
+
+            //also maybe add the else loop thing here instead // else loop 0; If loop = 1 then reply this section
+            if (dataGridView1.DataSource != null)
+            {
+                dataGridView1.DataSource = null;
+                dataGridView1.Rows.Clear();
+            }
+            
+            dataGridView1.DataSource = extendedDataTable;
+            if (elseLoop == 1)
+            {
+                elseLoop = 0;
+                missingDescription();
+            }
+            elseLoop = 0;
+            return;
         }
 
         private void stockValidation()
         {
+            return;
             lbl_prog.Text = "Checking for Errors...";
             //work out cost of each stock entered and if it is above X value then trigger a warning.
             using (SqlConnection conn = new SqlConnection(CONNECT.ConnectionString))
