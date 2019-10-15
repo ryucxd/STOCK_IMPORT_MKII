@@ -70,7 +70,16 @@ namespace stock_import_mkll
         {
             DialogResult result = MessageBox.Show("Are you sure you want to DELETE this entry?", "Warning!", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
             if (result == DialogResult.Yes)
+            {
+                GlobalVariables.deleted = 1;
+                GlobalVariables.col0 = "";
+                GlobalVariables.col1 = ""; // on deleting  this wipes the previous stored values to stop double rows
+                GlobalVariables.col2 = ""; //although it needs to wipe the current values
+                GlobalVariables.col3 = "";
+                GlobalVariables.col4 = ""; //also need to 
+                GlobalVariables.col5 = "";
                 this.Close();
+            }
             else
                 return;
         }
@@ -95,8 +104,8 @@ namespace stock_import_mkll
                 {
                     //move it to DT and work out how to save it etc
                     GlobalVariables.col0 = dataGridView1.Rows[0].Cells[0].Value.ToString();
-                    GlobalVariables.col1 = dataGridView1.Rows[0].Cells[1].Value.ToString();
-                    GlobalVariables.col2 = dataGridView1.Rows[0].Cells[2].Value.ToString();
+                    GlobalVariables.col1 = dataGridView1.Rows[0].Cells[1].Value.ToString(); // on deleting  this needs to not execute
+                    GlobalVariables.col2 = dataGridView1.Rows[0].Cells[2].Value.ToString(); //although it needs to wipe the current values
                     GlobalVariables.col3 = dataGridView1.Rows[0].Cells[3].Value.ToString();
                     GlobalVariables.col4 = dataGridView1.Rows[0].Cells[4].Value.ToString();
                     GlobalVariables.col5 = dataGridView1.Rows[0].Cells[5].Value.ToString();
@@ -107,7 +116,7 @@ namespace stock_import_mkll
                     return;
             }
             else
-                MessageBox.Show("That is not a valid stock code! If there is not one present then use delete"); //this needs to be much nicer
+                MessageBox.Show("That is not a valid stock code! If there is not one present then use delete", "No Stock Code!", MessageBoxButtons.YesNo, MessageBoxIcon.Warning); //this needs to be much nicer
         }
     }
 

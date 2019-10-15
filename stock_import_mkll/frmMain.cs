@@ -266,19 +266,27 @@ namespace stock_import_mkll
                         data.Rows[0][4] = dataGridView1.Rows[row.Index].Cells[4].Value;
                         data.Rows[0][5] = dataGridView1.Rows[row.Index].Cells[5].Value;
                         //openform
+                        lbl_prog.Text = "Fixing Broken Stock Codes...";
                         frmFixStockCode frm = new frmFixStockCode(data);
                         frm.ShowDialog();
                         //add new vaLUes to dt if its not null
-                        
-                        if ((GlobalVariables.col0.Length) > 0)
+                        if (GlobalVariables.deleted != 1)
                         {
-                            fixedStockCodeDT.Rows.Add();
-                            fixedStockCodeDT.Rows[datatableCount][0] = GlobalVariables.col0;
-                            fixedStockCodeDT.Rows[datatableCount][1] = GlobalVariables.col1;
-                            fixedStockCodeDT.Rows[datatableCount][2] = GlobalVariables.col2;
-                            fixedStockCodeDT.Rows[datatableCount][3] = GlobalVariables.col3;
-                            fixedStockCodeDT.Rows[datatableCount][4] = GlobalVariables.col4;
-                            fixedStockCodeDT.Rows[datatableCount][5] = GlobalVariables.col5;
+                            if ((GlobalVariables.col0.Length) > 0)
+                            {
+                                fixedStockCodeDT.Rows.Add();
+                                fixedStockCodeDT.Rows[datatableCount][0] = GlobalVariables.col0;
+                                fixedStockCodeDT.Rows[datatableCount][1] = GlobalVariables.col1;
+                                fixedStockCodeDT.Rows[datatableCount][2] = GlobalVariables.col2;
+                                fixedStockCodeDT.Rows[datatableCount][3] = GlobalVariables.col3;
+                                fixedStockCodeDT.Rows[datatableCount][4] = GlobalVariables.col4;
+                                fixedStockCodeDT.Rows[datatableCount][5] = GlobalVariables.col5;
+                                datatableCount++;
+                            }
+                        }
+                        else
+                        {
+                            GlobalVariables.deleted = 0;
                             datatableCount++;
                         }
 
@@ -355,13 +363,13 @@ namespace stock_import_mkll
                 missingDescription();
             }
             elseLoop = 0;
-            return;
+           
         }
 
         private void stockValidation()
         {
-            return;
             lbl_prog.Text = "Checking for Errors...";
+            int isRed = 0;
             //work out cost of each stock entered and if it is above X value then trigger a warning.
             using (SqlConnection conn = new SqlConnection(CONNECT.ConnectionString))
             {
@@ -371,7 +379,7 @@ namespace stock_import_mkll
                 progression.Maximum = progression_complete;
                 decimal price;
                 int isYellow = 0;
-                int isRed = 0;
+
                 string temp;
                 decimal total_price;
                 decimal quantity;
@@ -431,19 +439,79 @@ namespace stock_import_mkll
                 btn_check_csv.Show();
                 if (isYellow > 0)
                     MessageBox.Show("There are " + isYellow.ToString() + " entries that have triggered warnings. Please click 'Check CSV' to amend these");
-                if (isRed > 0)
-                    MessageBox.Show("There are " + isRed.ToString() + "entries that have triggered ERRORS. Please click 'Check CSV' to remove these ", "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
 
                 progression.Hide();
                 progression.Value = 0;
                 lbl_prog.Text = "To fix any errors click 'Check CSV'!";
             }
 
+            //remove all that are red
+            //basically any that dont have a valid stock_code
+            if (isRed > 0)
+            {
+                lbl_prog.Text = "Deleting entries with no Stock Code";
+                MessageBox.Show("As there are  " + isRed.ToString() + " entries without a stock code so they will be deleted! ", "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            foreach (DataGridViewRow row in dataGridView1.Rows)
+            {
+
+                
+                if (row.DefaultCellStyle.BackColor == Color.Red)
+                {
+                    dataGridView1.Rows.RemoveAt(row.Index);
+                }
+            }
+
+
         }
 
         private void Btn_check_csv_Click(object sender, EventArgs e)
         {
+            // start by removing the  bad entires
+            //gonna add this automatically to make the end users experience less click intensivee
+            //
+            progression.Value = 0;
+            progression_complete = dataGridView1.Rows.Count;
+            lbl_prog.Text = "Correcting over estimated values... ";
 
+            foreach (DataGridViewRow row in dataGridView1.Rows)
+            {
+
+                if (row.DefaultCellStyle.BackColor == Color.Yellow)
+                {
+                    //start working out the cost of X and Y 
+                    decimal price = 0;
+                    string sql = "SELECT [cost_price] from [dbo].[stock] = '" + row.Cells[0].Value + "'";
+                    using (SqlConnection conn = new SqlConnection(CONNECT.ConnectionString))
+                    {
+                        using (SqlCommand cmd = new SqlCommand(sql, conn))
+                        {
+                            conn.Open();
+                            price = Convert.ToDecimal(cmd.ExecuteScalar());
+                            conn.Close();
+                        }
+                    }
+                    //work out the maths for price * qty
+                    price = Math.Round((price * Convert.ToDecimal(dataGridView1.Rows[row.Index].Cells[2].Value)), 2);
+
+                    //open form
+                    frm_fixYellow frm = new frm_fixYellow(Convert.ToInt32(dataGridView1.Rows[row.Index].Cells[0].Value),price,Convert.ToDecimal(dataGridView1.Rows[row.Index].Cells[2].Value),dataGridView1.Rows[row.Index].Cells[1].Value.ToString());
+                    frm.ShowDialog();
+                    if (frm.overRide == 1) //if they used a secure password to bypass
+                    {
+                        //change colour to lightblue or something
+                    }
+                }
+                else
+                { // assign new quantity to that row and change the colour
+
+                }
+
+            }
+
+
+            //first start off by  getting form to  display everything that is yellow
+           
         }
     }
 }

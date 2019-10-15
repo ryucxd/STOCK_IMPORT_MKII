@@ -14,5 +14,7 @@ namespace stock_import_mkll
         public static string col3;
         public static string col4;
         public static string col5;
+        public static int deleted;
+        public static bool isVerified;
     }
 }

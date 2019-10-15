@@ -50,6 +50,18 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CONNECT.cs" />
+    <Compile Include="frmPassword.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmPassword.Designer.cs">
+      <DependentUpon>frmPassword.cs</DependentUpon>
+    </Compile>
+    <Compile Include="frm_fixYellow.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frm_fixYellow.Designer.cs">
+      <DependentUpon>frm_fixYellow.cs</DependentUpon>
+    </Compile>
     <Compile Include="frmFixStockCode.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -70,6 +82,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="frmMain.resx">
       <DependentUpon>frmMain.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmPassword.resx">
+      <DependentUpon>frmPassword.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frm_fixyellow.resx">
+      <DependentUpon>frm_fixYellow.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
