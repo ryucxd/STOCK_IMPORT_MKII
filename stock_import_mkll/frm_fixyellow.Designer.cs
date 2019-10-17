@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frm_fixYellow));
             this.label3 = new System.Windows.Forms.Label();
             this.btn_cancel = new System.Windows.Forms.Button();
             this.btn_ignore = new System.Windows.Forms.Button();
@@ -56,6 +57,7 @@
             this.btn_cancel.TabIndex = 12;
             this.btn_cancel.Text = "Cancel";
             this.btn_cancel.UseVisualStyleBackColor = true;
+            this.btn_cancel.Click += new System.EventHandler(this.Btn_cancel_Click);
             // 
             // btn_ignore
             // 
@@ -90,9 +92,9 @@
             this.label2.Font = new System.Drawing.Font("Calibri", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label2.Location = new System.Drawing.Point(12, 28);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(418, 15);
+            this.label2.Size = new System.Drawing.Size(77, 15);
             this.label2.TabIndex = 8;
-            this.label2.Text = "The quantity for this item is: 1500 and the Total price would have been: 320";
+            this.label2.Text = "warnings etc\r\n";
             // 
             // label1
             // 
@@ -113,9 +115,11 @@
             this.btn_delete.TabIndex = 14;
             this.btn_delete.Text = "Delete entry";
             this.btn_delete.UseVisualStyleBackColor = true;
+            this.btn_delete.Click += new System.EventHandler(this.Btn_delete_Click);
             // 
             // frm_fixYellow
             // 
+            this.AcceptButton = this.btn_amend;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(625, 116);
@@ -127,8 +131,10 @@
             this.Controls.Add(this.btn_amend);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "frm_fixYellow";
-            this.Text = "Form1";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+            this.Text = "Over Estimated Values";
             this.ResumeLayout(false);
             this.PerformLayout();
 

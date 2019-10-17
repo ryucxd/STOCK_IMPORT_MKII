@@ -40,8 +40,11 @@
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.btn_check_csv = new System.Windows.Forms.Button();
             this.txt_csv_location = new System.Windows.Forms.TextBox();
+            this.btn_snapShot = new System.Windows.Forms.Button();
+            this.dataGridView2 = new System.Windows.Forms.DataGridView();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridView2)).BeginInit();
             this.SuspendLayout();
             // 
             // cmb_department
@@ -125,14 +128,12 @@
             // 
             // lbl_prog
             // 
-            this.lbl_prog.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.lbl_prog.AutoSize = true;
-            this.lbl_prog.Location = new System.Drawing.Point(160, 71);
+            this.lbl_prog.Location = new System.Drawing.Point(15, 71);
             this.lbl_prog.Name = "lbl_prog";
-            this.lbl_prog.Size = new System.Drawing.Size(72, 13);
+            this.lbl_prog.Size = new System.Drawing.Size(414, 13);
             this.lbl_prog.TabIndex = 7;
             this.lbl_prog.Text = "CSV Location";
-            this.lbl_prog.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.lbl_prog.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // pictureBox1
             // 
@@ -148,6 +149,7 @@
             // btn_check_csv
             // 
             this.btn_check_csv.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btn_check_csv.Enabled = false;
             this.btn_check_csv.Font = new System.Drawing.Font("Calibri", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btn_check_csv.Location = new System.Drawing.Point(354, 87);
             this.btn_check_csv.Name = "btn_check_csv";
@@ -167,11 +169,44 @@
             this.txt_csv_location.Size = new System.Drawing.Size(255, 23);
             this.txt_csv_location.TabIndex = 10;
             // 
+            // btn_snapShot
+            // 
+            this.btn_snapShot.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btn_snapShot.Enabled = false;
+            this.btn_snapShot.Font = new System.Drawing.Font("Calibri", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btn_snapShot.Location = new System.Drawing.Point(354, 58);
+            this.btn_snapShot.Name = "btn_snapShot";
+            this.btn_snapShot.Size = new System.Drawing.Size(75, 23);
+            this.btn_snapShot.TabIndex = 11;
+            this.btn_snapShot.Text = "SnapShot";
+            this.btn_snapShot.UseVisualStyleBackColor = true;
+            this.btn_snapShot.Visible = false;
+            // 
+            // dataGridView2
+            // 
+            this.dataGridView2.AllowUserToAddRows = false;
+            this.dataGridView2.AllowUserToDeleteRows = false;
+            this.dataGridView2.AllowUserToResizeColumns = false;
+            this.dataGridView2.AllowUserToResizeRows = false;
+            this.dataGridView2.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.dataGridView2.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            this.dataGridView2.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dataGridView2.Location = new System.Drawing.Point(0, 0);
+            this.dataGridView2.Name = "dataGridView2";
+            this.dataGridView2.ReadOnly = true;
+            this.dataGridView2.RowHeadersVisible = false;
+            this.dataGridView2.Size = new System.Drawing.Size(0, 0);
+            this.dataGridView2.TabIndex = 12;
+            // 
             // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(712, 428);
+            this.Controls.Add(this.dataGridView2);
+            this.Controls.Add(this.btn_snapShot);
             this.Controls.Add(this.btn_check_csv);
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.lbl_prog);
@@ -190,6 +225,7 @@
             this.Load += new System.EventHandler(this.FrmMain_Load);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridView2)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -208,6 +244,8 @@
         private System.Windows.Forms.PictureBox pictureBox1;
         private System.Windows.Forms.Button btn_check_csv;
         private System.Windows.Forms.TextBox txt_csv_location;
+        private System.Windows.Forms.Button btn_snapShot;
+        private System.Windows.Forms.DataGridView dataGridView2;
     }
 }
 

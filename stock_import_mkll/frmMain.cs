@@ -19,19 +19,33 @@ namespace stock_import_mkll
         public int multiple_csv_check { get; set; }
         public int progression_complete { get; set; }
         public DataTable extendedDataTable { get; set; }
+        public DataTable deletedRows { get; set; }
+        public int deletedRowsCount { get; set; }
         public int datatableCount { get; set; }
         public DataTable fixedStockCodeDT { get; set; }
         public frmMain()
         {
             InitializeComponent();
             //add combobox text
+            dataGridView1.AutoGenerateColumns = false;
             cmb_department.Items.Add("Traditional");
             cmb_department.Items.Add("Slimline");
-            //
+            format();
             cmb_type.Items.Add("Full");
             cmb_type.Items.Add("Partial");
             cmb_type.Items.Add("Incremental");
             datatableCount = 0;
+
+            //populate deleted row datatable
+            deletedRows = new DataTable();
+            deletedRows.Columns.AddRange(new[] {
+                    new DataColumn ("item Code"),
+                    new DataColumn ("item   name"),
+                    new DataColumn ("QTY"),
+                    new DataColumn ("UoM"),
+                    new DataColumn ("Location"),
+                    new DataColumn ("TimeStamp")
+                });
         }
 
         private void FrmMain_Load(object sender, EventArgs e)
@@ -42,6 +56,19 @@ namespace stock_import_mkll
         private void format()
         {
             //datagridview formatting
+            dataGridView1.Columns.Add("StockCode", "Stock Code");
+            dataGridView1.Columns.Add("ItemName", "Item Name");
+            dataGridView1.Columns.Add("Qty", "QTY");
+            dataGridView1.Columns.Add("UoM","UoM");
+            dataGridView1.Columns.Add("Location", "Location");
+            dataGridView1.Columns.Add("TimeStamp", "Time Stamp");
+
+            //dataGridView1.Columns[0].HeaderText = "Stock Code";
+            //dataGridView1.Columns[1].HeaderText = "Item Name";
+            //dataGridView1.Columns[2].HeaderText = "QTY";
+            //dataGridView1.Columns[3].HeaderText = "UoM";
+            //dataGridView1.Columns[4].HeaderText = "Location";
+            //dataGridView1.Columns[5].HeaderText = "Time Stamp";
         }
 
         private void Btn_add_csv_Click(object sender, EventArgs e)
@@ -150,6 +177,7 @@ namespace stock_import_mkll
             multiple_csv_check = 1;
             //flag suspicious values
             stockValidation();
+            btn_check_csv.Enabled = true;
         }
 
         private void csv_append(string fileName)
@@ -182,7 +210,8 @@ namespace stock_import_mkll
                 dt.Rows.Add(dr);
             }
             dataGridView1.DataSource = null;
-            dataGridView1.Rows.Clear();
+            dataGridView1.Refresh();
+            //add column name
             //should only add as there is no clear
             if (System.IO.File.Exists(fileName))
             {
@@ -208,6 +237,7 @@ namespace stock_import_mkll
             dataGridView1.DataSource = dt;
             extendedDataTable = null;
             extendedDataTable = dt;
+           // format();
             missingDescription();
             stockValidation();
         }
@@ -227,7 +257,7 @@ namespace stock_import_mkll
         private void missingDescription()
         {
             int elseLoop = 0;
-            
+
 
             lbl_prog.Text = "Adding missing descriptions...";
             //this is a bit overkill but none the less
@@ -236,7 +266,7 @@ namespace stock_import_mkll
             {
                 foreach (DataGridViewRow row in dataGridView1.Rows)
                 {
-                    if (IsDigitsOnly(dataGridView1.Rows[row.Index].Cells[0].Value.ToString()) == true && (dataGridView1.Rows[row.Index].Cells[0].Value.ToString().Length) >0 )
+                    if (IsDigitsOnly(dataGridView1.Rows[row.Index].Cells[0].Value.ToString()) == true && (dataGridView1.Rows[row.Index].Cells[0].Value.ToString().Length) > 0)
                     {
                         sql = "SELECT [description] FROM dbo.stock WHERE stock_code = " + dataGridView1.Rows[row.Index].Cells[0].Value.ToString();
                         using (SqlCommand cmd = new SqlCommand(sql, conn))
@@ -296,29 +326,28 @@ namespace stock_import_mkll
                 //delete rowindex and add new table
                 if (elseLoop == 1)
                 {
+                    for (int i = 0; i < arrayIndex; i++)
+                    {
+                      //  MessageBox.Show(rowIndex[i].ToString());
+                        deletedRows.Rows.Add();
+                        deletedRows.Rows[deletedRowsCount][0] = dataGridView1.Rows[rowIndex[i]].Cells[0].Value;
+                        deletedRows.Rows[deletedRowsCount][1] = dataGridView1.Rows[rowIndex[i]].Cells[1].Value;
+                        deletedRows.Rows[deletedRowsCount][2] = dataGridView1.Rows[rowIndex[i]].Cells[2].Value;
+                        deletedRows.Rows[deletedRowsCount][3] = dataGridView1.Rows[rowIndex[i]].Cells[3].Value;
+                        deletedRows.Rows[deletedRowsCount][4] = dataGridView1.Rows[rowIndex[i]].Cells[4].Value;
+                        deletedRows.Rows[deletedRowsCount][5] = dataGridView1.Rows[rowIndex[i]].Cells[5].Value;
+                        deletedRowsCount = deletedRowsCount + 1;
+                    }
+
                     int adjust = 0;
                     for (int i = 0; i < arrayIndex; i++)
                     {
-                       // MessageBox.Show("dgv count -> " + dataGridView1.Rows.Count.ToString());
-                        //MessageBox.Show("array index -> " + rowIndex[i].ToString());
+                        //add to DT before deleting it
+                       // MessageBox.Show(rowIndex[i].ToString());
                         dataGridView1.Rows.RemoveAt(rowIndex[i] - adjust);
                         adjust++;
                     }
-                    //if (fixedStockCodeDT.Rows.Count > 0)
-                    //{
-                    //    extendedDataTable.Rows.Clear();
-                    //    foreach (DataGridViewRow row in dataGridView1.Rows)
-                    //    {
-                    //        DataRow DR = extendedDataTable.NewRow();
-                    //        foreach (DataGridViewCell cell in row.Cells)
-                    //            DR[cell.ColumnIndex] = cell.Value;
-                    //        extendedDataTable.Rows.Add(DR);
-                    //    }
-                    //    //extendedDataTable.Merge(fixedStockCodeDT);
-                    //    dataGridView1.DataSource = extendedDataTable;
-                    //    fixedStockCodeDT = null;
-                    //  //  missingDescription();
-                    //}
+                    //here here
 
                 }
             }
@@ -355,7 +384,7 @@ namespace stock_import_mkll
                 dataGridView1.DataSource = null;
                 dataGridView1.Rows.Clear();
             }
-            
+
             dataGridView1.DataSource = extendedDataTable;
             if (elseLoop == 1)
             {
@@ -363,7 +392,7 @@ namespace stock_import_mkll
                 missingDescription();
             }
             elseLoop = 0;
-           
+
         }
 
         private void stockValidation()
@@ -448,32 +477,44 @@ namespace stock_import_mkll
             //remove all that are red
             //basically any that dont have a valid stock_code
             if (isRed > 0)
-            {
+            { //possibly email this list or ignore
                 lbl_prog.Text = "Deleting entries with no Stock Code";
-                MessageBox.Show("As there are  " + isRed.ToString() + " entries without a stock code so they will be deleted! ", "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(isRed.ToString() + " entries have been removed! ", "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             foreach (DataGridViewRow row in dataGridView1.Rows)
             {
 
-                
+
                 if (row.DefaultCellStyle.BackColor == Color.Red)
-                {
+                {    // add rows to dt before deleteing
+                    deletedRows.Rows.Add();
+                    deletedRows.Rows[deletedRowsCount][0] = dataGridView1.Rows[row.Index].Cells[0].Value;
+                    deletedRows.Rows[deletedRowsCount][1] = dataGridView1.Rows[row.Index].Cells[1].Value;
+                    deletedRows.Rows[deletedRowsCount][2] = dataGridView1.Rows[row.Index].Cells[2].Value;
+                    deletedRows.Rows[deletedRowsCount][3] = dataGridView1.Rows[row.Index].Cells[3].Value;
+                    deletedRows.Rows[deletedRowsCount][4] = dataGridView1.Rows[row.Index].Cells[4].Value;
+                    deletedRows.Rows[deletedRowsCount][5] = dataGridView1.Rows[row.Index].Cells[5].Value;
+                    deletedRowsCount = deletedRowsCount + 1;
+
+                    //remove
                     dataGridView1.Rows.RemoveAt(row.Index);
                 }
             }
 
+            lbl_prog.Text = "No errors remaining.";
 
         }
 
         private void Btn_check_csv_Click(object sender, EventArgs e)
         {
+            //disable add csv for the rest of the run
+            btn_add_csv.Enabled = false;
             // start by removing the  bad entires
             //gonna add this automatically to make the end users experience less click intensivee
             //
             progression.Value = 0;
             progression_complete = dataGridView1.Rows.Count;
             lbl_prog.Text = "Correcting over estimated values... ";
-
             foreach (DataGridViewRow row in dataGridView1.Rows)
             {
 
@@ -481,7 +522,7 @@ namespace stock_import_mkll
                 {
                     //start working out the cost of X and Y 
                     decimal price = 0;
-                    string sql = "SELECT [cost_price] from [dbo].[stock] = '" + row.Cells[0].Value + "'";
+                    string sql = "SELECT [cost_price] from [dbo].[stock] WHERE stock_code = '" + row.Cells[0].Value + "'";
                     using (SqlConnection conn = new SqlConnection(CONNECT.ConnectionString))
                     {
                         using (SqlCommand cmd = new SqlCommand(sql, conn))
@@ -495,23 +536,99 @@ namespace stock_import_mkll
                     price = Math.Round((price * Convert.ToDecimal(dataGridView1.Rows[row.Index].Cells[2].Value)), 2);
 
                     //open form
-                    frm_fixYellow frm = new frm_fixYellow(Convert.ToInt32(dataGridView1.Rows[row.Index].Cells[0].Value),price,Convert.ToDecimal(dataGridView1.Rows[row.Index].Cells[2].Value),dataGridView1.Rows[row.Index].Cells[1].Value.ToString());
-                    frm.ShowDialog();
-                    if (frm.overRide == 1) //if they used a secure password to bypass
+                    frm_fixYellow frmFY = new frm_fixYellow(Convert.ToInt32(dataGridView1.Rows[row.Index].Cells[0].Value), price, Convert.ToDecimal(dataGridView1.Rows[row.Index].Cells[2].Value), dataGridView1.Rows[row.Index].Cells[1].Value.ToString());
+                    frmFY.ShowDialog();
+                    if (frmFY._overRide == 1) //bypass all once password is entered
+                        row.DefaultCellStyle.BackColor = Color.LightBlue; //
+                    else if (frmFY._QTY == 1)//amend value button
+                    { //Change the qty from the old value to the new one
+                        row.Cells[2].Value = frmFY._newQuantity;
+                        row.DefaultCellStyle.BackColor = Color.LightBlue;
+                    }
+                    else if (frmFY._delete == 1) //if they cant amend qty or use password -- delete --
                     {
-                        //change colour to lightblue or something
+                        // add this to the DT for emailing
+
+                        //deleting the row while in a foreach loop would be silly
+                        //change colour of the row and handle the deleting outside
+                        row.DefaultCellStyle.BackColor = Color.Red;
+                    }
+
+                }
+
+                progression.Value = progression.Value + 1;
+            } //for each end
+            lbl_prog.Text = "Deleting selected records...";
+            int dgvCount = dataGridView1.Rows.Count;
+            for (int i = 0; i < dgvCount; i++)
+            {
+                if (dataGridView1.Rows[i].DefaultCellStyle.BackColor == Color.Red)
+                {
+                    //add to dgv first 
+                    deletedRows.Rows.Add();
+                    deletedRows.Rows[deletedRowsCount][0] = dataGridView1.Rows[i].Cells[0].Value;
+                    deletedRows.Rows[deletedRowsCount][1] = dataGridView1.Rows[i].Cells[1].Value;
+                    deletedRows.Rows[deletedRowsCount][2] = dataGridView1.Rows[i].Cells[2].Value;
+                    deletedRows.Rows[deletedRowsCount][3] = dataGridView1.Rows[i].Cells[3].Value;
+                    deletedRows.Rows[deletedRowsCount][4] = dataGridView1.Rows[i].Cells[4].Value;
+                    deletedRows.Rows[deletedRowsCount][5] = dataGridView1.Rows[i].Cells[5].Value;
+                    deletedRowsCount = deletedRowsCount + 1;
+                    // then remove
+                    dataGridView1.Rows.RemoveAt(i); //
+                    dgvCount = dgvCount - 1;
+                    i = i - 1;
+                }
+            }
+            lbl_prog.Text = "Finished Checking CSV";
+            progression.Hide();
+            progression.Value = 0;
+
+            email();
+
+        }
+
+
+
+
+        private void email()
+        {
+            int Email = 0;
+            dataGridView2.DataSource = deletedRows;
+
+            //email the deleted records here....
+            using (SqlConnection conn = new SqlConnection(CONNECT.ConnectionString))
+            {
+                for (int i = 0; i < dataGridView2.Rows.Count; i++)
+                {
+                    string sql = "insert into dbo.ryucxd_deleted_stock (stock_code,[description],quantity,[location],time_stamp,UoM) " +
+                        "VALUES('" + dataGridView2.Rows[i].Cells[0].Value.ToString() + "','" + dataGridView2.Rows[i].Cells[1].Value.ToString() +
+                        "','" + dataGridView2.Rows[i].Cells[2].Value.ToString() + "','" + dataGridView2.Rows[i].Cells[4].Value.ToString() + "','" +
+                        dataGridView2.Rows[i].Cells[5].Value.ToString() + "','" + dataGridView2.Rows[i].Cells[3].Value.ToString() + "')";
+                    MessageBox.Show(sql);
+                    using (var command = new SqlCommand(sql, conn))
+                    {
+                        conn.Open();
+                        command.ExecuteNonQuery();
+                        conn.Close();
                     }
                 }
-                else
-                { // assign new quantity to that row and change the colour
+                //email now
+                Email = 1;
+                using (var command = new SqlCommand("usp_ryucxd_deleted_stock_import", conn)
+                {
+                    CommandType = System.Data.CommandType.StoredProcedure
 
+                })
+                {
+                    conn.Open();
+
+                    command.ExecuteNonQuery();
+
+                    conn.Close();
                 }
-
             }
 
-
-            //first start off by  getting form to  display everything that is yellow
-           
+           // dataGridView2.DataSource = null;
         }
     }
 }
