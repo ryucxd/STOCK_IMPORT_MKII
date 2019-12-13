@@ -266,9 +266,13 @@ namespace stock_import_mkll
             {
                 foreach (DataGridViewRow row in dataGridView1.Rows)
                 {
-                    if (IsDigitsOnly(dataGridView1.Rows[row.Index].Cells[0].Value.ToString()) == true && (dataGridView1.Rows[row.Index].Cells[0].Value.ToString().Length) > 0)
+                    if (string.IsNullOrEmpty(Convert.ToString(dataGridView1.Rows[row.Index].Cells[0].Value)))
                     {
-                        sql = "SELECT [description] FROM dbo.stock WHERE stock_code = " + dataGridView1.Rows[row.Index].Cells[0].Value.ToString();
+                        continue;
+                    }
+                    if (IsDigitsOnly(Convert.ToString(dataGridView1.Rows[row.Index].Cells[0].Value)) == true)
+                    {
+                        sql = "SELECT [description] FROM dbo.stock WHERE stock_code = " + Convert.ToString(dataGridView1.Rows[row.Index].Cells[0].Value);
                         using (SqlCommand cmd = new SqlCommand(sql, conn))
                         {
                             string missingData = "";
@@ -432,14 +436,14 @@ namespace stock_import_mkll
                             price = 0;
                         }
                         //   MessageBox.Show(price.ToString());
-
+                        return;
 
 
 
                         if (conn.State == ConnectionState.Closed)
                             MessageBox.Show("Connection error!");
                         // MessageBox.Show(dataGridView1.Rows[row].Cells[2].Value.ToString());
-                        temp = (row.Cells[2].Value.ToString());
+                        temp = (dataGridView1.Rows[row.Index].Cells[2].Value.ToString()); //why is this null all of a sudden!?
                         quantity = decimal.Parse(temp);
 
                         if (quantity > 5000) //THIS IS THE CRITERIA THAT CAN BE CHANGED
